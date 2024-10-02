@@ -3,8 +3,10 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import { Home } from "./pages/Home";
-import { Login } from "@mui/icons-material";
+import { Dashboard } from "./pages/Dashboard";
+import { Login } from "./pages/Login";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+
 
 const queryClient = new QueryClient();
 
@@ -15,8 +17,15 @@ function App() {
         <Router>
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute allowedRoles={["user", "admin"]}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
         </Router>

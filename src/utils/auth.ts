@@ -1,7 +1,4 @@
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.REACT_APP_JWT_SECRET || "secret";
-
+import { jwtDecode } from "jwt-decode";
 export interface User {
   id: number;
   username: string;
@@ -9,34 +6,27 @@ export interface User {
   role: "admin" | "user";
 }
 
-export const generateToken = (user: User) => {
-  return jwt.sign(user, JWT_SECRET as string, { expiresIn: "1h" });
-};
-
-export const verifyToken = (token: string) => {
+export const decodeToken = (token: string) => {
   try {
-    return jwt.verify(token, JWT_SECRET as string) as User;
+    const decodedToken = jwtDecode<User>(token);
+    return decodedToken;
   } catch (error) {
-    console.log(error);
+    console.error("Token inválido", error);
     return null;
   }
 };
 
 export const login = async (username: string, password: string) => {
-  if (username === "admin" && password === "password") {
-    const user: User = {
-      id: 1,
-      username: "admin",
-      role: "admin",
-    };
-    return generateToken(user);
-  } else if (username === "user" && password === "password") {
-    const user: User = {
-      id: 2,
-      username: "user",
-      role: "user",
-    };
-    return generateToken(user);
+  if (username === "diego" && password === "admin") {
+    const token =  import.meta.env.VITE_TOKEN_ADMIN || "";
+    const decodedAdmin = decodeToken(token);
+    // console.log({ decodedAdmin });
+    return token;
+  } else if (username === "natalia" && password === "user") {
+    const token =  import.meta.env.VITE_TOKEN_USER || "";
+    const decodedUser = decodeToken(token);
+    // console.log({ decodedUser });
+    return token;
   }
   return null;
 };

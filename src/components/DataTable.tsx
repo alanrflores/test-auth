@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-
+import EditIcon from '@mui/icons-material/Edit';
 export interface Data {
   id: number;
   title: string;
@@ -21,9 +22,10 @@ export interface Data {
 interface DataTableProps {
   data: Data[];
   onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
-export const DataTable = ({ data, onEdit }: DataTableProps) => {
+export const DataTable = ({ data, onEdit, onDelete }: DataTableProps) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
@@ -63,6 +65,7 @@ export const DataTable = ({ data, onEdit }: DataTableProps) => {
               <TableCell>Contenido</TableCell>
               <TableCell>Usuario</TableCell>
               {onEdit && <TableCell>Editar</TableCell>}
+              {/* {onDelete && <TableCell>Eliminar</TableCell>} */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -77,9 +80,16 @@ export const DataTable = ({ data, onEdit }: DataTableProps) => {
                     <TableCell>{row.userId}</TableCell>
                     {onEdit && (
                       <TableCell>
-                        <button onClick={() => onEdit(row.id)}>Editar</button>
+                        <Button variant="outlined" color="info" onClick={() => onEdit(row.id)}>
+                          <EditIcon />
+                        </Button>
                       </TableCell>
                     )}
+                    {/* {onDelete && (
+                      <TableCell>
+                        <Button variant="outlined" color="error" onClick={() => onDelete(row.id)}>Eliminar</Button>
+                      </TableCell>
+                    )} */}
                   </TableRow>
                 ))}
           </TableBody>
