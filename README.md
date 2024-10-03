@@ -1,50 +1,55 @@
-# React + TypeScript + Vite
+# App Auth
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una aplicación de autenticación construida con React, Vite y Material UI. La aplicación permite la autenticación de usuarios y contiene funcionalidades de administración de usuarios.
 
-Currently, two official plugins are available:
+## Estructura del Proyecto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+La estructura del proyecto es la siguiente:
 
-## Expanding the ESLint configuration
+```bash
+src/
+├── components/   # Componentes de la aplicación
+├── contexts/     # Contextos de React para la gestión de auth y su estado global
+├── hooks/        # Custom hooks para encapsular lógica reutilizable
+├── pages/        # Páginas principales de la aplicación
+├── services/     # Servicios y llamadas a la API
+├── utils/        # Funciones utilitarias y helpers
+├── App.tsx       # Componente raíz de la aplicación
+├── main.tsx      # Punto de entrada de la aplicación
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-- Configure the top-level `parserOptions` property like this:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Requisitos Previos
+
+Asegúrate de tener instalados los siguientes requisitos en tu sistema:
+
+- Node.js (versión 14 o superior)
+- npm (gestor de paquetes)
+
+## Instalación
+
+1. Clona el repositorio:
+ https://github.com/alanrflores/test-auth.git
+
+cd app-auth
+
+npm install
+
+2. Crea un archivo .env en la raíz del proyecto con las siguientes variables de entorno:
+
+VITE_APP_BASE_URL=https://jsonplaceholder.typicode.com
+VITE_TOKEN_ADMIN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+VITE_TOKEN_USER=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+VITE_USER_ADMIN=diego
+VITE_USER_ADMIN_PASSWORD=admin
+VITE_USER=natalia
+VITE_USER_PASSWORD=user
+
+3. Ejecución de la Aplicación
+
+Para iniciar la aplicación en modo de desarrollo:
+npm run dev
+
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
