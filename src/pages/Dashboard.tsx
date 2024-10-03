@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { DataTable } from "../components/DataTable";
 import { useQuery } from "react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Notification } from "../components/Notification";
 import { getPosts } from "../services/api";
-import { Admin, SeverityType } from "../components/Admin";
+import { Admin } from "../components/Admin";
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export const Dashboard = () => {
   const [notification, setNotification] = useState({
     open: false,
     message: "",
-    severity: "info" as SeverityType,
+    severity: "info" as "info" | "success" | "error" | "warning",
   });
 
   if (isLoading) return <Typography>Loading...</Typography>;
@@ -24,11 +24,10 @@ export const Dashboard = () => {
       <Typography variant="body1" gutterBottom>
         Has iniciado sesión como {user?.role}.
       </Typography>
-
-      {user?.role === "admin" ? (
-        <Admin />
-      ) : user?.role === "user" ? (
-        <>
+      {user?.role === "admin" 
+      ? (<Admin />) 
+      : user?.role === "user" 
+      ? (<>
           <DataTable
             data={data ?? []}
           />
@@ -38,10 +37,8 @@ export const Dashboard = () => {
             severity={notification.severity}
             onClose={() => setNotification({ ...notification, open: false })}
           />
-        </>
-      ) : (
-        <Typography>No tienes permisos para acceder a esta página</Typography>
-      )}
+        </>) 
+        : (<Typography>No tienes permisos para acceder a esta página</Typography>)}
     </Box>
   );
 };

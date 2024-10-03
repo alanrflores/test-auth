@@ -5,11 +5,12 @@ export interface Post {
   id: number;
   title: string;
   body: string;
+  isLocal?: boolean;
 }
 
-
 const api = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_URL || "https://jsonplaceholder.typicode.com",
+  baseURL:
+    import.meta.env.VITE_APP_BASE_URL || "https://jsonplaceholder.typicode.com",
 });
 
 api.interceptors.request.use((config) => {
@@ -31,109 +32,129 @@ const setLocalPosts = (posts: Post[]) => {
 
 const getLocalUpdates = (): Record<number, Post> => {
   const localUpdates = localStorage.getItem("localUpdates");
+
   return localUpdates ? JSON.parse(localUpdates) : {};
 };
-
 
 const setLocalUpdates = (updates: Record<number, Post>) => {
   localStorage.setItem("localUpdates", JSON.stringify(updates));
 };
 
-export const getPosts = async (): Promise<Post[]> => {
+export const getPosts = async () => {
   try {
     const response = await api.get("/posts");
     const apiPosts: Post[] = response.data;
     const localPosts = getLocalPosts();
-    const localUpdates = getLocalUpdates();
+    // const localUpdates = getLocalUpdates();
+    const localIds = new Set(localPosts.map((post) => post.id));
 
     const combinedPosts = [
-      ...apiPosts.map(post => localUpdates[post.id] || post),
-      ...localPosts,
+      ...apiPosts.filter((post) => !localIds.has(post.id)),
+      ...localPosts.map((post) => ({ ...post, isLocal: true })),
     ];
+    // console.log({ combinedPosts });
+
     return combinedPosts;
   } catch (error) {
     console.log(error);
-    return [...getLocalPosts(), ...Object.values(getLocalUpdates())];
+    return [...getLocalPosts().map((post) => ({ ...post, isLocal: true }))];
   }
 };
 
-const getHighestId = (): number => {
+const getNextId = (): number => {
   const localPosts = getLocalPosts();
-  const highestLocalId = localPosts.length > 0 ? Math.max(...localPosts.map(post => post.id)) : 0;
-  return Math.max(highestLocalId, 100); // asumo que la API inicia con un ID de 100
+  // Verifico que haya posts locales, si no, comienza con ID 101
+  if (localPosts.length === 0) {
+    console.log("No hay posts locales, comienza desde ID 101");
+    return 101;
+  }
+
+  const highestId = Math.max(...localPosts.map((post) => post.id || 0));
+
+  return highestId + 1 > 100 ? highestId + 1 : 101;
 };
 
-export const createPost = async (post: Omit<Post, "id">): Promise<Post | null> => {
+export const createPost = async (post: Post): Promise<Post | null> => {
   try {
     const response = await api.post("/posts", post);
     const newPost: Post = response.data;
 
-    // si el ID no es valido, lo cambio a uno valido
-    if (!newPost.id || newPost.id <= getHighestId()) {
-      newPost.id = getHighestId() + 1;
-    }
-
     const localPosts = getLocalPosts();
+    newPost.id = getNextId(); // Siempre incrementar el ID basándose en los posts locales
+
     const updatedLocalPosts = [...localPosts, newPost];
+
+    setLocalPosts(updatedLocalPosts);
+    return newPost; // Post creado en la API y actualizado localmente
+  } catch (error) {
+    console.log("Error al crear post en la API:", error);
+    return null; // Manejo el error de la API
+  }
+};
+
+export const updatePost = async (
+  id: number,
+  data: { title: string; body: string; userId: number; isLocal?: boolean }
+) => {
+  const { title, body, userId, isLocal } = data;
+
+ 
+  if (isLocal) {
+    const localPosts = getLocalPosts();
+    const updatedLocalPosts = localPosts.map((post) =>
+      post.id === id ? { ...post, ...data } : post
+    );
     setLocalPosts(updatedLocalPosts);
 
-    return newPost;
-  } catch (error) {
-    console.error("Error creating post:", error);
-
-    const newId = getHighestId() + 1;
-    const newLocalPost: Post = { ...post, id: newId };
-    
-    const localPosts = getLocalPosts();
-    setLocalPosts([...localPosts, newLocalPost]);
-
-    return newLocalPost;
+    return { id, ...data };
   }
-};
 
-export const updatePost = async (id: number, data: { title: string; body: string, userId:number }) => {
   try {
-    const response = await api.put(`/posts/${id}`, data);
+    const response = await api.put(`/posts/${id}`, { title, body, userId });
     const updatedPost: Post = response.data;
 
-    const localUpdates = getLocalUpdates();
-    localUpdates[id] = {...localUpdates[id], ...updatedPost};
-    setLocalUpdates(localUpdates);
+    const localPosts = getLocalPosts();
+    const updatedLocalPosts = localPosts.map((post) =>
+      post.id === id ? { ...post, ...updatedPost } : post
+    );
 
-    return updatedPost;
- 
+    setLocalPosts(updatedLocalPosts);
+    return updatedLocalPosts;
   } catch (error) {
-    console.log(error);
-    
-    const localUpdates = getLocalUpdates();
-    const existingPost = localUpdates[id] || {id, title: "", body: "", userId: 1};
-    const updateLocalPosts: Post = {...existingPost, ...data};
-    localUpdates[id] = updateLocalPosts;
-    setLocalUpdates(localUpdates);
+    // Si falla la llamada a la API, actualizo solo localmente
+    const localPosts = getLocalPosts();
+    const updatedLocalPosts = localPosts.map((post) =>
+      post.id === id ? { ...post, ...data } : post
+    );
+    setLocalPosts(updatedLocalPosts);
 
-    return updateLocalPosts;
+    return { id, ...data };
   }
 };
 
-export const deletePost = async (id: number): Promise<boolean> => {
+
+export const deletePost = async (
+  id: number,
+  isLocal: boolean = false
+): Promise<boolean | undefined> => {
   try {
+    // Si el post es local, no llamo a la API, solo lo elimino localmente
+    if (isLocal) {
+      const localPosts = getLocalPosts().filter((post) => post.id !== id);
+      setLocalPosts(localPosts);
+      return true;
+    }
 
-    await api.delete(`/posts/${id}`);
+    const result = await api.delete(`/posts/${id}`);
+    // console.log({ result });
 
-    const localPosts = getLocalPosts().filter(post => post.id !== id);
-    setLocalPosts(localPosts);
-
-    const localUpdates = getLocalUpdates();
-    delete localUpdates[id];
-    setLocalUpdates(localUpdates);
-
-    return true;
+    if (result.status === 200) {
+      const localPosts = getLocalPosts().filter((post) => post.id !== id);
+      setLocalPosts(localPosts);
+      return true;
+    }
   } catch (error) {
-
-    const localUpdates = getLocalUpdates();
-    localUpdates[id] = { ...localUpdates[id] };
-    setLocalUpdates(localUpdates);
-
-    return true;
+    console.log("Error eliminando post en la API:", error);
+    return false;
   }
 };

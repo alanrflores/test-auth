@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -12,15 +12,11 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-export interface Data {
-  id: number;
-  title: string;
-  body: string;
-  userId: number;
-}
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Post } from "../services/api";
 interface DataTableProps {
-  data: Data[];
+  data: Post[];
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
 }
@@ -30,11 +26,13 @@ export const DataTable = ({ data, onEdit, onDelete }: DataTableProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
 
-  const filteredData = data.filter(
-    (item) =>
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.body.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredData = Array.isArray(data)
+    ? data.filter(
+        (item) =>
+          item.title?.toLowerCase().includes(search.toLowerCase()) ||
+          item.body?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
   const handleChangePage = (e: unknown, newPage: number) => {
     setPage(newPage);
@@ -44,6 +42,19 @@ export const DataTable = ({ data, onEdit, onDelete }: DataTableProps) => {
     setRowsPerPage(parseInt(e.target.value, 10));
     setPage(0);
   };
+
+  const handleDelete = useCallback(
+    (id: number) => {
+      onDelete && onDelete(id as number);
+    },
+    [onDelete]
+  );
+
+  useEffect(() => {
+    if (filteredData.length === 100 && page === 20) {
+      setPage(19);
+    }
+  }, [filteredData, page]);
 
   return (
     <Box>
@@ -64,8 +75,8 @@ export const DataTable = ({ data, onEdit, onDelete }: DataTableProps) => {
               <TableCell>Título</TableCell>
               <TableCell>Contenido</TableCell>
               <TableCell>Usuario</TableCell>
-              {onEdit && <TableCell>Editar</TableCell>}
-              {/* {onDelete && <TableCell>Eliminar</TableCell>} */}
+              {/* {onEdit &&  <TableCell>Editar</TableCell>}
+             {onDelete && <TableCell>Eliminar</TableCell>}   */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -78,18 +89,28 @@ export const DataTable = ({ data, onEdit, onDelete }: DataTableProps) => {
                     <TableCell>{row.title}</TableCell>
                     <TableCell>{row.body}</TableCell>
                     <TableCell>{row.userId}</TableCell>
-                    {onEdit && (
+                    {onEdit && row.isLocal && (
                       <TableCell>
-                        <Button variant="outlined" color="info" onClick={() => onEdit(row.id)}>
+                        <Button
+                          variant="outlined"
+                          color="info"
+                          onClick={() => onEdit(row.id)}
+                        >
                           <EditIcon />
                         </Button>
                       </TableCell>
                     )}
-                    {/* {onDelete && (
+                    {onDelete && row.isLocal && (
                       <TableCell>
-                        <Button variant="outlined" color="error" onClick={() => onDelete(row.id)}>Eliminar</Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDelete(row.id)}
+                        >
+                          <DeleteIcon />
+                        </Button>
                       </TableCell>
-                    )} */}
+                    )}
                   </TableRow>
                 ))}
           </TableBody>

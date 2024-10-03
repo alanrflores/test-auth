@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../hooks/useAuth";
@@ -32,7 +32,7 @@ export const Login = () => {
         <Typography variant="h5" component="h1" gutterBottom align="center">
           Iniciar sesión
         </Typography>
-         
+
          <LoginForm />
       </Paper>
       ) : (

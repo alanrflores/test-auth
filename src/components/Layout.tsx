@@ -27,7 +27,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       >
         <Toolbar
           sx={{
-            justifyContent: "space-between",
+            justifyContent: user ? "space-between" : "center",
             alignItems: "center",
             marginX: 1,
           }}
@@ -35,7 +35,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <Typography variant="h6" component="div" sx={{}}>
             PRUEBA DE ROLES
           </Typography>
-          {user ? (
+          {user && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography variant="body1" sx={{ mr: 4 }}>
                 {user.username.toLocaleUpperCase()}
@@ -55,22 +55,6 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 Cerrar sesión
               </Button>
             </Box>
-          ) : (
-            <>
-              <Button
-                color="inherit"
-                sx={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  borderRadius: 1,
-                  padding: "6px 12px",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-                 onClick={() => navigate("/login")}>
-                Iniciar sesión
-              </Button>
-            </>
           )}
         </Toolbar>
       </AppBar>

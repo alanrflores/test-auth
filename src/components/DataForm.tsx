@@ -1,52 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Box, Button, IconButton, TextField } from "@mui/material";
 import { Post } from "../services/api";
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import useFormData from "../hooks/useFormData";
 interface DataFormProps {
   onSubmit: (data: Omit<Post, "id"> & { id?: number | undefined }) => void;
   initialData?: Post;
 }
 
-export const DataForm: React.FC<DataFormProps> = ({
-  onSubmit,
-  initialData,
-}) => {
-  const [formData, setFormData] = useState<Omit<Post, "id"> & { id?: number }>({
-    title: "",
-    body: "",
-    userId: 1,
-  });
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      setFormData({ title: "", body: "", userId: 1 });
-    }
-  }, [initialData]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleUserIdChange = (increment: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      userId: Math.min(Math.max(prev.userId + (increment ? 1 : -1), 1), 10),
-    }));
-  };
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-    if (!initialData) {
-      setFormData({ title: "", body: "", userId: 1 });
-    }
-  };
+export const DataForm = ({ onSubmit, initialData }: DataFormProps) => {
+  const { formData, handleChange, handleUserIdChange, handleSubmit } = useFormData({ initialData, onSubmit });
 
   return (
     <Box component="form" onSubmit={handleSubmit}>

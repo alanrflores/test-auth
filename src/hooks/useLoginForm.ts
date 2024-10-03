@@ -42,7 +42,7 @@ export const useLoginForm = () => {
       );
       if (token) {
         authLogin(token);
-        navigate("/dashboard");
+        navigate("/");
       } else {
         setError("Usuario o contraseña incorrectos");
       }

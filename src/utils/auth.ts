@@ -6,6 +6,11 @@ export interface User {
   role: "admin" | "user";
 }
 
+const userAdmin = import.meta.env.VITE_USER_ADMIN || "";
+const userAdminPassword = import.meta.env.VITE_USER_ADMIN_PASSWORD || "";
+const user = import.meta.env.VITE_USER || "";
+const userPassword = import.meta.env.VITE_USER_PASSWORD || "";
+
 export const decodeToken = (token: string) => {
   try {
     const decodedToken = jwtDecode<User>(token);
@@ -17,12 +22,12 @@ export const decodeToken = (token: string) => {
 };
 
 export const login = async (username: string, password: string) => {
-  if (username === "diego" && password === "admin") {
+  if (username === userAdmin && password === userAdminPassword) {
     const token =  import.meta.env.VITE_TOKEN_ADMIN || "";
     const decodedAdmin = decodeToken(token);
     // console.log({ decodedAdmin });
     return token;
-  } else if (username === "natalia" && password === "user") {
+  } else if (username === user && password === userPassword) {
     const token =  import.meta.env.VITE_TOKEN_USER || "";
     const decodedUser = decodeToken(token);
     // console.log({ decodedUser });
